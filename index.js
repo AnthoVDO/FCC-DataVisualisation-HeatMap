@@ -20,6 +20,27 @@ const COLOR = {
     hot: "#6B2723"
 }
 
+const checkColor = (element) => {
+    const temp = element
+    if (temp > -1 && temp <= 0) {
+        return COLOR.sweet;
+    } else if (temp > -3 && temp <= -2) {
+        return COLOR.cold;
+    } else if (temp <= -3) {
+        return COLOR.veryCold;
+    } else if (temp >= 2 && temp < 3) {
+        return COLOR.warm;
+    } else if (temp >= 3) {
+        return COLOR.hot;
+    } else if (temp > -2 && temp <= -1) {
+        return COLOR.cool
+    } else if (temp >= 1 && temp < 2) {
+        return COLOR.above
+    } else if (temp > 0 && temp < 1) {
+        return COLOR.normal
+    }
+}
+
 /*---------------------------Function API---------------------------*/
 
 //Call API
@@ -135,24 +156,7 @@ const globalTempData = async(URL) => {
         .attr("data-year", d => d.year)
         .attr("data-temp", d => d.variance)
         .attr("fill", d => {
-            const temp = d.variance;
-            if (temp > -1 && temp <= 0) {
-                return COLOR.sweet;
-            } else if (temp > -3 && temp <= -2) {
-                return COLOR.cold;
-            } else if (temp <= -3) {
-                return COLOR.veryCold;
-            } else if (temp >= 2 && temp < 3) {
-                return COLOR.warm;
-            } else if (temp >= 3) {
-                return COLOR.hot;
-            } else if (temp > -2 && temp <= -1) {
-                return COLOR.cool
-            } else if (temp >= 1 && temp < 2) {
-                return COLOR.above
-            } else if (temp > 0 && temp < 1) {
-                return COLOR.normal
-            }
+            return checkColor(d.variance)
         })
 
     //create tooltip
@@ -171,11 +175,8 @@ const globalTempData = async(URL) => {
 
         let cell = e.currentTarget.dataset;
         let variation = 8.66 + parseFloat(cell.temp);
-        console.log(e.pageX - e.offsetX)
         const diffX = e.pageX - e.offsetX
         const diffY = e.pageY - e.offsetY
-        const toolBoxCenter = tooltip.style("width");
-        console.log(toolBoxCenter)
 
 
         tooltip.style("opacity", "1")
@@ -184,24 +185,20 @@ const globalTempData = async(URL) => {
             .style("top", (e.clientY - diffY + 50) + "px")
             .style("left", (e.clientX - diffX - 84) + "px")
             .html(`Month: ${monthForScale[cell.month-1]} <br> Year: ${cell.year} <br> Variance: ${cell.temp}°C <br> Temperature: ${variation.toFixed(3)}°C`)
+        d3.select(e.currentTarget).attr("fill", "green");
     })
 
     chart.selectAll(".cell").on("mouseout", (e) => {
         tooltip.style("opacity", "0");
+        d3.select(e.currentTarget).attr("fill", d => {
+            return checkColor(d.variance)
+        })
     })
 
     //create legend
 
     const heatLegend = [-4, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 4]
-    const heatLegendText = [4.66, 5.66,
-        6.66,
-        7.66,
-        9.66,
-        8.66,
-        10.66,
-        11.66,
-        12.66
-    ]
+    const heatLegendText = [4.66, 5.66, 6.66, 7.66, 9.66, 8.66, 10.66, 11.66, 12.66]
     const xLegendMin = CHART__WIDTH / 4;
     const xLegendMax = (CHART__WIDTH / 4) * 3;
     const yLegendMin = CHART__HEIGHT - (MARGIN.bottom / 2);
@@ -223,24 +220,7 @@ const globalTempData = async(URL) => {
         .attr("width", xLegendScale.bandwidth())
         .attr("height", yLegendScale.bandwidth())
         .attr("fill", d => {
-            const temp = d
-            if (temp > -1 && temp <= 0) {
-                return COLOR.sweet;
-            } else if (temp > -3 && temp <= -2) {
-                return COLOR.cold;
-            } else if (temp <= -3) {
-                return COLOR.veryCold;
-            } else if (temp >= 2 && temp < 3) {
-                return COLOR.warm;
-            } else if (temp >= 3) {
-                return COLOR.hot;
-            } else if (temp > -2 && temp <= -1) {
-                return COLOR.cool
-            } else if (temp >= 1 && temp < 2) {
-                return COLOR.above
-            } else if (temp > 0 && temp < 1) {
-                return COLOR.normal
-            }
+            return checkColor(d)
         })
         .attr("transform", `translate(0, ${CHART__HEIGHT-MARGIN.bottom/2} )`)
     const legendAxis = d3.axisBottom()
@@ -270,13 +250,6 @@ const globalTempData = async(URL) => {
             }
         })
 
-
-
-
-
-
-
-    console.log(response);
 }
 
 globalTempData(CHART__URL);
